@@ -1,0 +1,50 @@
+﻿@page "/"
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using System.Collections.ObjectModel
+@using Observable_Collection.Components.Data;
+
+<div Style="margin-bottom:15px">
+    <SfButton CssClass="e-outline" OnClick="@(() => AddRecords())" Content="Add Data"></SfButton>
+    <SfButton CssClass="e-outline" Style="margin-left:5px" OnClick="@(() => DelRecords())" Content="Delete Data"></SfButton>
+    <SfButton CssClass="e-outline" Style="margin-left:5px" OnClick="@(() => UpdateRecords())" Content="Update Data"></SfButton>
+</div>
+
+<SfGrid DataSource="@GridData" AllowReordering="true">
+    <GridColumns>
+        <GridColumn Field=@nameof(OrdersDetailsObserveData.OrderID) HeaderText="Order ID" IsPrimaryKey="true" TextAlign="@TextAlign.Center" HeaderTextAlign="@TextAlign.Center" Width="140"></GridColumn>
+        <GridColumn Field=@nameof(OrdersDetailsObserveData.CustomerID) HeaderText="Customer Name" Width="150"></GridColumn>
+        <GridColumn Field=@nameof(OrdersDetailsObserveData.Freight) HeaderText="Freight" EditType="EditType.NumericEdit" Format="C2" Width="140" TextAlign="@TextAlign.Right" HeaderTextAlign="@TextAlign.Right"></GridColumn>
+        <GridColumn Field=@nameof(OrdersDetailsObserveData.OrderDate) HeaderText="Order Date" EditType="EditType.DatePickerEdit" Format="d" Type="ColumnType.Date" Width="160"></GridColumn>
+        <GridColumn Field=@nameof(OrdersDetailsObserveData.ShipCountry) HeaderText="Ship Country" EditType="EditType.DropDownEdit" Width="150"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+
+@code {
+
+    public ObservableCollection<OrdersDetailsObserveData> GridData { get; set; }
+    public int Count = 32341;
+
+    protected override void OnInitialized()
+    {
+        GridData = OrdersDetailsObserveData.GetRecords();
+    }
+
+    public void AddRecords()
+    {
+        GridData.Add(new OrdersDetailsObserveData(Count++, "ALFKI", 4343, 2.3 * 43, false, new DateTime(1991, 05, 15), "Berlin", "Simons bistro", "Denmark", new DateTime(1996, 7, 16), "Kirchgasse 6"));
+    }
+
+    public void DelRecords()
+    {
+        GridData.Remove(GridData.First());
+    }
+
+    public void UpdateRecords()
+    {
+        var a = GridData.First();
+        a.CustomerID = "Update";
+    }
+}
