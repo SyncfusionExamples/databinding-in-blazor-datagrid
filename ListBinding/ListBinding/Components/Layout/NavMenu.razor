@@ -1,0 +1,46 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">ListBinding</a>
+    </div>
+</div>
+
+<SfAccordion ExpandMode="ExpandMode.Single">
+    <AccordionItems>
+        <AccordionItem Header="List Binding" Content="List Binding">
+            <ContentTemplate>
+                <SfAccordion Height="30px">
+                    <AccordionItems ChildContent="@ExpandoObjectBinding">
+                    </AccordionItems>
+                </SfAccordion>
+                <SfAccordion Height="45px">
+                    <AccordionItems ChildContent="@ExpandoObjectComplexBinding">
+                    </AccordionItems>
+                </SfAccordion>
+                <SfAccordion Height="30px">
+                    <AccordionItems ChildContent="@DynamicObjectBinding">
+                    </AccordionItems>
+                </SfAccordion>
+                <SfAccordion Height="45px">
+                    <AccordionItems ChildContent="@DynamicObjectComplexBinding">
+                    </AccordionItems>
+                </SfAccordion>
+            </ContentTemplate>
+        </AccordionItem>
+    </AccordionItems>
+</SfAccordion>
+
+@code {
+
+    private RenderFragment ExpandoObjectBinding => @<div>
+        <NavLink class="nav-link" href="expandoobjectbinding" onclick="blur" style="color:black;">Expando Object Binding</NavLink>
+    </div>;
+    private RenderFragment ExpandoObjectComplexBinding => @<div>
+        <NavLink class="nav-link" href="expandoobjectcomplexbinding" onclick="blur" style="color:black;">Expando Object Complex Binding</NavLink>
+    </div>;
+    private RenderFragment DynamicObjectBinding => @<div>
+        <NavLink class="nav-link" href="dynamicobjectbinding" onclick="blur" style="color:black;">Dynamic Object Binding</NavLink>
+    </div>;
+    private RenderFragment DynamicObjectComplexBinding => @<div>
+        <NavLink class="nav-link" href="dynamicobjectcomplexbinding" onclick="blur" style="color:black;">Dynamic Object Binding</NavLink>
+    </div>;
+}

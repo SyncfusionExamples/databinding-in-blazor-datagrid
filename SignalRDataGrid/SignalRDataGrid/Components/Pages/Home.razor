@@ -1,0 +1,80 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+
+@using SignalRDataGrid.Data
+@inject OrderDetails OrderService
+@implements IAsyncDisposable
+
+@using Syncfusion.Blazor.Grids
+
+<div>
+    <h1>SignalR Blazor Data Grid </h1>
+</div>
+<SfGrid @ref="Grid" Height="250" DataSource="@OrderData" AllowSorting="true" AllowFiltering="true" ID="GridDemo" AllowPaging="true" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel", "Search" })">
+    <GridEvents OnActionComplete="ActionComplete" TValue="OrderDetails"></GridEvents>
+    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true"></GridEditSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(OrderDetails.OrderID) HeaderText="Order ID" IsPrimaryKey="true" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(OrderDetails.CustomerID) HeaderText="Customer Name" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(OrderDetails.ShipName) HeaderText=" Ship Name" Width="130"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    SfGrid<OrderDetails> Grid { get; set; }
+    private HubConnection hubConnection;
+    public List<OrderDetails> OrderData = new List<OrderDetails>();
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On("ReceiveMessage", () =>
+        {
+            CallLoadData();
+        });
+
+        await hubConnection.StartAsync();
+
+        await LoadData();
+    }
+
+    public async Task ActionComplete(ActionEventArgs<OrderDetails> Args)
+    {
+        if (Args.RequestType == Syncfusion.Blazor.Grids.Action.Save)
+        {
+            await OrderService.UpdateAsync(Args.Data);
+            if (IsConnected) await Send();
+        }
+        if (Args.RequestType == Syncfusion.Blazor.Grids.Action.Delete)
+        {
+            OrderData = OrderService.DeleteAsync(Args.Data);
+            if (IsConnected) await Send();
+        }
+    }
+
+    private void CallLoadData()
+    {
+        Grid.Refresh();
+    }
+
+    protected async Task LoadData()
+    {
+        OrderData = await OrderDetails.GetOrdersAsync();
+    }
+
+    async Task Send() =>
+        await hubConnection.SendAsync("SendMessage");
+
+        public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
+
+        public async ValueTask DisposeAsync()
+        {
+            if (hubConnection is not null)
+            {
+                await hubConnection.DisposeAsync();
+            }
+        }
+}
