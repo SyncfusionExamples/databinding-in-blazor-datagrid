@@ -1,0 +1,293 @@
+﻿<h1>Data Table</h1>
+
+@page "/"
+@using Syncfusion.Blazor;
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Grids
+@using System.Dynamic;
+@using System.Data;
+@using System.Collections
+
+<SfGrid TValue="ExpandoObject" ID="Grid" AllowGrouping="true" AllowSorting="true" AllowPaging="true" AllowFiltering="true" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel", "Search" })">
+    <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+    <GridEditSettings AllowEditing="true" AllowDeleting="true" AllowAdding="true" Mode="@EditMode.Normal"></GridEditSettings>
+    <GridGroupSettings ShowGroupedColumn="true"></GridGroupSettings>
+    <GridPageSettings PageSize="8"></GridPageSettings>
+    <GridAggregates>
+        <GridAggregate>
+            <GridAggregateColumns>
+                <GridAggregateColumn Field=Freight Type="AggregateType.Sum" Format="C2">
+                    <FooterTemplate>
+                        @{
+                            var aggregate = (context as AggregateTemplateContext);
+                            <div>
+                                <p>Sum: @aggregate.Sum</p>
+                            </div>
+                        }
+                    </FooterTemplate>
+                </GridAggregateColumn>
+            </GridAggregateColumns>
+        </GridAggregate>
+    </GridAggregates>
+    <GridColumns>
+        <GridColumn Field="OrderID" HeaderText="Order ID" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Width="100"></GridColumn>
+        <GridColumn Field="CustomerID" HeaderText="Customer Name" ValidationRules="@(new ValidationRules { Required=true})" Width="100"></GridColumn>
+        <GridColumn Field="OrderDate" HeaderText="Order Date" Format="d" Type="ColumnType.Date" Width="110"></GridColumn>
+        <GridColumn Field="Freight" TextAlign="TextAlign.Right" AllowGrouping="false" Format="C2" Width="100"></GridColumn>
+        <GridColumn Field="EmployeeID" HeaderText="Employee ID" Width="100"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public static DataTable dataTable { get; set; }
+    public static IQueryable DataSource;
+    protected override void OnInitialized()
+    {
+        dataTable = GetData();
+
+        // Convert the DataTable to an IQueryable<ExpandoObject> collection.
+        DataSource = ToQueryableCollection(dataTable);
+    }
+
+    // Custom adaptor class to handle data operations by extending the DataAdaptor class.
+    public class CustomAdaptor : DataAdaptor
+    {
+        // Perform the Read operation to fetch data from the source.
+        public override object Read(DataManagerRequest DataManagerRequest, string key = null)
+        {
+            // Apply searching, sorting, and filtering.
+            DataSource = PerformDataOperation(dataTable, DataManagerRequest);
+
+            // Get the total record count.
+            int count = DataSource.Cast<ExpandoObject>().Count();
+
+            // Perform paging operation using skip and take.
+            if (DataManagerRequest.Skip != 0)
+            {
+                DataSource = QueryableOperation.PerformSkip<object>((IQueryable<object>)DataSource, DataManagerRequest.Skip);
+            }
+            if (DataManagerRequest.Take != 0)
+            {
+                DataSource = QueryableOperation.PerformTake<object>((IQueryable<object>)DataSource, DataManagerRequest.Take);
+            }
+
+            // Perform aggregation operation.
+            IDictionary<string, object> aggregates = new Dictionary<string, object>();
+            if (DataManagerRequest.Aggregates != null)
+            {
+                aggregates = DataUtil.PerformAggregation(DataSource, DataManagerRequest.Aggregates);
+            }
+
+            // Perform grouping operation.
+            DataResult DataObject = new DataResult();
+            if (DataManagerRequest.Group != null)
+            {
+                IEnumerable result = (IEnumerable)DataSource;
+                foreach (var group in DataManagerRequest.Group)
+                {
+                    result = DataUtil.Group<ExpandoObject>(result, group, DataManagerRequest.Aggregates, 0, DataManagerRequest.GroupByFormatter);
+                }
+
+                // Return grouped data with count and aggregates if required.
+                return DataManagerRequest.RequiresCounts ? new DataResult() { Result = result, Count = count, Aggregates = aggregates } : (object)DataSource;
+            }
+            
+            // Return the final result with count and aggregates if required.
+            return DataManagerRequest.RequiresCounts ? new DataResult() { Result = DataSource, Count = count, Aggregates = aggregates } : (object)DataSource;
+        }
+
+        // Performs data operations like searching, sorting, and filtering.
+        public static IQueryable PerformDataOperation(DataTable DataTable, DataManagerRequest DataManagerRequest)
+        {
+            // Convert the DataTable to an IQueryable collection.
+            DataSource = ToQueryableCollection(DataTable);
+
+            if (DataManagerRequest.Search != null && DataManagerRequest.Search.Count > 0)
+            {
+                // Perform searching operation.
+                DataSource = DynamicObjectOperation.PerformSearching(DataSource, DataManagerRequest.Search);
+            }
+            if (DataManagerRequest.Where != null && DataManagerRequest.Where.Count > 0)
+            {
+                // Perform filtering operation.
+                DataSource = DynamicObjectOperation.PerformFiltering(DataSource, DataManagerRequest.Where, DataManagerRequest.Where[0].Operator);
+            }
+            if (DataManagerRequest.Sorted != null && DataManagerRequest.Sorted.Count > 0)
+            {
+                // Perform sorting operation.
+                DataSource = DynamicObjectOperation.PerformSorting(DataSource, DataManagerRequest.Sorted);
+            }
+            return DataSource;
+        }
+
+        // Perform insert operation.
+        public override object Insert(DataManager DataManagerRequest, object value, string key)
+        {
+            DataRow newRow = dataTable.NewRow();
+            var data = (ExpandoObject)value;
+            foreach (var item in data)
+            {
+                newRow[item.Key] = item.Value ?? DBNull.Value;
+            }
+
+            // Insert the new row at the top of the DataTable.
+            dataTable.Rows.InsertAt(newRow, 0);
+
+            return value;
+        }
+
+        // Perform remove operation.
+        public override object Remove(DataManager DataManagerRequest, object value, string keyField, string key)
+        {
+            DataRow? rowToRemove = null;
+
+            // Find the row to remove based on the key field value.
+            foreach (DataRow row in dataTable.Rows)
+            {
+                if (row[keyField].Equals(value))
+                {
+                    rowToRemove = row;
+                    break;
+                }
+            }
+
+            // Remove the row from the DataTable if it exists.
+            if (rowToRemove != null)
+            {
+                dataTable.Rows.Remove(rowToRemove);
+            }
+            return value;
+        }
+
+        // Perform update operation.
+        public override object Update(DataManager DataManagerRequest, object value, string keyField, string key)
+        {
+            var data = (IDictionary<string, object>)value;
+
+            // Find the row to update based on the key field value.
+            var rowToUpdate = dataTable.Rows
+            .Cast<DataRow>()
+            .FirstOrDefault(row => row[keyField].Equals(data[keyField]));
+
+            // Update the row with new values if found.
+            if (rowToUpdate != null)
+            {
+                foreach (DataColumn column in dataTable.Columns)
+                {
+                    var columnName = column.ColumnName;
+                    var newValue = data[column.ColumnName] ?? column.DefaultValue;
+                    rowToUpdate[columnName] = newValue;
+                }
+            }
+            return value;
+        }
+
+        // Perform batch update operation for changed, added, and deleted records.
+        public override object BatchUpdate(DataManager DataManagerRequest, object Changed, object Added, object Deleted, string KeyField, string Key, int? dropIndex)
+        {
+            // Handle changed records.
+            if (Changed != null)
+            {
+                var changedRecords = (IEnumerable<IDictionary<string, object>>)Changed;
+                foreach (var record in changedRecords)
+                {
+                    foreach (DataRow row in dataTable.Rows)
+                    {
+                        if (row[KeyField].Equals(record[KeyField]))
+                        {
+                            foreach (DataColumn column in dataTable.Columns)
+                            {
+                                row[column.ColumnName] = record[column.ColumnName] ?? column.DefaultValue;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Handle added records.
+            if (Added != null)
+            {
+                var addedRecords = (IEnumerable<IDictionary<string, object>>)Added;
+
+                foreach (var record in addedRecords)
+                {
+                    DataRow newRow = dataTable.NewRow();
+                    foreach (var item in record)
+                    {
+                        newRow[item.Key] = item.Value ?? DBNull.Value;
+                    }
+
+                    // Add the new row to the DataTable.
+                    dataTable.Rows.Add(newRow);
+                }
+            }
+
+            // Handle deleted records.
+            if (Deleted != null)
+            {
+                var deletedRecords = (IEnumerable<IDictionary<string, object>>)Deleted;
+                List<DataRow> rowsToRemove = new List<DataRow>();
+                foreach (var record in deletedRecords)
+                {
+                    foreach (DataRow row in dataTable.Rows)
+                    {
+                        if (row[KeyField].Equals(record[KeyField]))
+                        {
+                            rowsToRemove.Add(row);
+                        }
+                    }
+                }
+
+                // Remove the rows from the DataTable.
+                foreach (DataRow rowToRemove in rowsToRemove)
+                {
+                    dataTable.Rows.Remove(rowToRemove);
+                }
+            }
+            return dataTable;
+        }
+    }
+
+    // Converts a DataTable to an IQueryable collection of ExpandoObjects.
+    public static IQueryable ToQueryableCollection(DataTable DataTable)
+    {
+        List<ExpandoObject> expandoList = new List<ExpandoObject>();
+        foreach (DataRow row in DataTable.Rows)
+        {
+            var expandoDict = new ExpandoObject() as IDictionary<String, Object>;
+            foreach (DataColumn col in DataTable.Columns)
+            {
+                var colValue = row[col.ColumnName];
+                colValue = (colValue == DBNull.Value) ? null : colValue;
+                expandoDict.Add(col.ToString(), colValue);
+            }
+            expandoList.Add((ExpandoObject)expandoDict);
+        }
+        return expandoList.AsQueryable();
+    }
+
+    public DataTable GetData()
+    {
+        DataTable DataTable = new DataTable();
+        DataTable.Columns.AddRange(new DataColumn[5] {
+            new DataColumn("OrderID", typeof(long)),
+            new DataColumn("CustomerID", typeof(string)),
+            new DataColumn("EmployeeID",typeof(int)),
+            new DataColumn("OrderDate",typeof(DateTime)),
+            new DataColumn("Freight", typeof(double))
+    });
+        int code = 1000;
+        int id = 0;
+        for (int i = 1; i <= 15; i++)
+        {
+            DataTable.Rows.Add(code + 1, "ALFKI", id + 1, new DateTime(1991, 05, 15), 2.32 * i);
+            DataTable.Rows.Add(code + 2, "CHOPS", id + 2, new DateTime(1990, 04, 04), 1.28 * i);
+            DataTable.Rows.Add(code + 3, "ANTON", id + 3, new DateTime(1957, 11, 30), 4.31 * i);
+            DataTable.Rows.Add(code + 4, "DRACH", id + 4, new DateTime(1930, 10, 22), 2.56 * i);
+            DataTable.Rows.Add(code + 5, "BOLID", id + 5, new DateTime(1953, 02, 18), 5.54 * i);
+            code += 5;
+            id += 5;
+        }
+        return DataTable;
+    }
+}
