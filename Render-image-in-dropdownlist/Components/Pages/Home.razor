@@ -1,0 +1,42 @@
+﻿@page "/"
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+@using BlazorApp1.Data
+
+<SfGrid DataSource="@Orders" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Cancel", "Update" })">
+    <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(OrderData.OrderID) HeaderText="Order ID" IsPrimaryKey="true" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        <GridForeignColumn Field=@nameof(OrderData.EmployeeID) HeaderText="Employee Name" ForeignKeyValue="FirstName" ForeignDataSource="@Employees" Width="120">
+            <EditTemplate>
+                @if (context is OrderData order)
+                {
+                    <SfDropDownList TValue="int" TItem="EmployeeData" @bind-Value="order.EmployeeID" DataSource="@Employees" Placeholder="Select Employee">
+                        <DropDownListFieldSettings Value="EmployeeID" Text="FirstName"></DropDownListFieldSettings>
+                        <DropDownListTemplates TItem="EmployeeData">
+                            <ItemTemplate Context="employee">
+                                <div style="display: flex; align-items: center;">
+                                    <img src="@($"scripts/Images/Employees/{employee.EmployeeID}.png")" alt="Employee" style="width: 50px;" />
+                                    <span>@employee.FirstName</span>
+                                </div>
+                            </ItemTemplate>
+                        </DropDownListTemplates>
+                    </SfDropDownList>
+                }
+            </EditTemplate>
+        </GridForeignColumn>
+        <GridColumn Field=@nameof(OrderData.Freight) HeaderText="Freight" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(OrderData.ShipCity) HeaderText="Ship City" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public List<OrderData> Orders { get; set; }
+    public List<EmployeeData> Employees { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Orders = OrderData.GetAllRecords();
+        Employees = EmployeeData.GetAllRecords();
+    }
+}

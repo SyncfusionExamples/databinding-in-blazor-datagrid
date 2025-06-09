@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\Scripts\Images\Employees\10.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="28.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.RichTextEditor" Version="28.2.3" />
+	  <PackageReference Include="Syncfusion.Blazor.TreeGrid" Version="28.2.3" />
+
+	  <PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Scripts\Images\Employees\1.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\10.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\2.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\3.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\4.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\5.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\6.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\7.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\8.png" />
+    <None Include="wwwroot\Scripts\Images\Employees\9.png" />
+  </ItemGroup>
+
+</Project>
