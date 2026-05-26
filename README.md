@@ -72,5 +72,5 @@ dotnet run
 ## References
 
 - [Blazor DataGrid Documentation](https://blazor.syncfusion.com/documentation/datagrid/getting-started-with-web-app)
-- [ASP.NET Core Documentation](https://learn.microsoft.com/en-us/aspnet/core)
-- [Blazor Documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor)
+- [Online Databinding Demo](https://blazor.syncfusion.com/demos/datagrid/local-data?theme=fluent2)
+
