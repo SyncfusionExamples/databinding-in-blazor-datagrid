@@ -5,7 +5,7 @@ A comprehensive collection of production-ready samples demonstrating modern data
 
 ## Overview
 
-This repository contains **9 carefully curated samples** that demonstrate essential data binding patterns for the Blazor DataGrid component. Whether you're building applications with static lists, real-time updates via SignalR, offline-first capabilities, or complex server-side operations, you'll find a working example here.
+This project demonstrate essential data binding patterns for the Blazor DataGrid component. Whether you're building applications with static lists, real-time updates via SignalR, offline-first capabilities, or complex server-side operations, you'll find a working example here.
 
 Each sample is a complete, standalone project with best practices for:
 - Clean architecture and separation of concerns
