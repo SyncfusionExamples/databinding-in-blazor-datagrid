@@ -72,5 +72,6 @@ dotnet run
 ## References
 
 - [Blazor DataGrid Documentation](https://blazor.syncfusion.com/documentation/datagrid/getting-started-with-web-app)
-- [Online Databinding Demo](https://blazor.syncfusion.com/demos/datagrid/local-data?theme=fluent2)
+-  [Blazor DataBinding Documentation](https://blazor.syncfusion.com/documentation/datagrid/data-binding/data-binding)
+- [Online DataBinding Demo](https://blazor.syncfusion.com/demos/datagrid/local-data?theme=fluent2)
 
