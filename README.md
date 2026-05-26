@@ -1,20 +1,18 @@
 # Blazor DataGrid Data Binding Samples
 
-A comprehensive collection of samples demonstrating data binding capabilities in  Blazor DataGrid. Each sample showcases different data sources and binding patterns to help you integrate DataGrid into your Blazor applications.
+A comprehensive collection of production-ready samples demonstrating modern data binding techniques in [Blazor DataGrid](https://www.syncfusion.com/blazor-components/blazor-datagrid).
+
 
 ## Overview
 
-| Sample | Description |
-|--------|-------------|
-| `ListBinding` | Basic list data binding with SfGrid |
-| `DataTable` | DataTable binding for dynamic data manipulation |
-| `add_range_items_observableCollection` | Adding multiple items to an ObservableCollection |
-| `observable_collection` | ObservableCollection data binding with real-time updates |
-| `Binding_data_from_excel` | Importing and binding data from Excel files |
-| `Render-image-in-dropdownlist` | Grid with foreign column and image rendering in dropdown |
-| `Fetch-result_from_the_DataManager_query` | Web API adaptor with DataManager query support |
-| `Offline-Mode` | DataGrid operations without network connectivity |
-| `SignalRDataGrid` | Real-time data updates via SignalR hub |
+This repository contains **9 carefully curated samples** that demonstrate essential data binding patterns for the Blazor DataGrid component. Whether you're building applications with static lists, real-time updates via SignalR, offline-first capabilities, or complex server-side operations, you'll find a working example here.
+
+Each sample is a complete, standalone project with best practices for:
+- Clean architecture and separation of concerns
+- CRUD operations (Create, Read, Update, Delete)
+- Advanced filtering, sorting, and paging
+- Error handling and user experience considerations
+
 
 ## Features
 
@@ -73,6 +71,6 @@ dotnet run
 ```
 ## References
 
-- [Blazor DataGrid Documentation](https://www.syncfusion.com/blazor-components/blazor-datagrid)
+- [Blazor DataGrid Documentation](https://blazor.syncfusion.com/documentation/datagrid/getting-started-with-web-app)
 - [ASP.NET Core Documentation](https://learn.microsoft.com/en-us/aspnet/core)
 - [Blazor Documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor)
